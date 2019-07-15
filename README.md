@@ -5,7 +5,7 @@
 建议MySQL-5.7.5以上，较低版本的包可能导致解析异常，未严格测试低版本协议
 
 # Packets type supported
-暂不支持压缩协议、Prepare语句、复制协议，后续版本再考虑支持
+暂不支持压缩协议、Prepare语句、复制协议，后续版本会支持
 
 # Make & Install
 git clone https://github.com/hustegg/mycap
