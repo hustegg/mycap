@@ -61,9 +61,9 @@ sudo ./mycap -i eth1 -w 192.168.0.1 -d both
 >WARN[2019-07-15 12:42:10.419367] [192.168.0.1:3306 => 192.168.0.2:35029] Server: OK: AffectedRows: [0], Warnings: [0], Info: []  
 >WARN[2019-07-15 12:42:18.449785] [192.168.0.2:35029 => 192.168.0.1:3306] Client: Query: select * from dba.delay_monitor  
 >WARN[2019-07-15 12:42:18.482213] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Count: [3]  
->WARN[2019-07-15 12:42:18.482229] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [dba], Table: [delay_monitor], Column: [id], CharSet: [[ ]]  
->WARN[2019-07-15 12:42:18.482238] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [dba], Table: [delay_monitor], Column: [Ftime], CharSet: [[ ]]  
->WARN[2019-07-15 12:42:18.482245] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [dba], Table: [delay_monitor], Column: [Fgtid], CharSet: [[ ]]  
+>WARN[2019-07-15 12:42:18.482229] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [test], Table: [t1], Column: [id], CharSet: [[ ]]  
+>WARN[2019-07-15 12:42:18.482238] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [test], Table: [t1], Column: [user], CharSet: [[ ]]  
+>WARN[2019-07-15 12:42:18.482245] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [test], Table: [t1], Column: [name], CharSet: [[ ]]  
 >WARN[2019-07-15 12:42:18.482252] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Result Set: [1, 2019-06-12 15:14:17, TestHisDB_QP_20190612151417_b0b166d7-8ce1-11e9-a0a8-c81fbecfd710]  
 >WARN[2019-07-15 12:42:18.482259] [192.168.0.1:3306 => 192.168.0.2:35029] Server: OK: AffectedRows: [0], Warnings: [0], Info: []  
 >ERRO[2019-07-15 12:42:20.137657] [192.168.0.2:35029 => 192.168.0.1:3306] Read Stream Error, [EOF], Read bytes [0]  
