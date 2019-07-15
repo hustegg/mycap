@@ -59,7 +59,7 @@ sudo ./mycap -i eth1 -w 192.168.0.1 -d both
 >WARN[2019-07-15 12:42:10.419347] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [], Table: [], Column: [now()], CharSet: [[ ]]  
 >WARN[2019-07-15 12:42:10.419356] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Result Set: [2019-07-15 12:42:10]  
 >WARN[2019-07-15 12:42:10.419367] [192.168.0.1:3306 => 192.168.0.2:35029] Server: OK: AffectedRows: [0], Warnings: [0], Info: []  
->WARN[2019-07-15 12:42:18.449785] [192.168.0.2:35029 => 192.168.0.1:3306] Client: Query: select * from dba.delay_monitor  
+>WARN[2019-07-15 12:42:18.449785] [192.168.0.2:35029 => 192.168.0.1:3306] Client: Query: select * from test.t1  
 >WARN[2019-07-15 12:42:18.482213] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Count: [3]  
 >WARN[2019-07-15 12:42:18.482229] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [test], Table: [t1], Column: [id], CharSet: [[ ]]  
 >WARN[2019-07-15 12:42:18.482238] [192.168.0.1:3306 => 192.168.0.2:35029] Server: Column Definition: Catalog: [def], Schema: [test], Table: [t1], Column: [user], CharSet: [[ ]]  
