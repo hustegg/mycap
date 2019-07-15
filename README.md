@@ -1,20 +1,28 @@
 # mycap
+====
 获取MySQL网络包并解析内容，支持指定IP黑白名单、最大抓包数量，后台运行时输出JSON格式日志便于分析
 
-# MySQL version recommend
+
+## MySQL version recommend
+====
 建议MySQL-5.7.5以上，较低版本的包可能导致解析异常，未严格测试低版本协议
 
-# Packets type supported
+
+## Packets type supported
+====
 暂不支持压缩协议、Prepare语句、复制协议，后续版本会支持
 
-# Make & Install
-git clone https://github.com/hustegg/mycap
 
-cd mycap
+## Make & Install
+====
+git clone https://github.com/hustegg/mycap  
+cd mycap  
+go build  
 
-go build
 
-# Usage
+## Usage
+====
+`
 Usage of ./mycap:  
   -b value  
         Packets white ip list separated by comma  
@@ -37,9 +45,10 @@ Usage of ./mycap:
         Logging in verbose  
   -w value  
         Packets white ip list separated by comma  
-  
+`
 
 # Example
+`
 sudo ./mycap -i eth1 -w 192.168.0.1 -d both  
 Start capture MySQL packets, device:eth1, max-cap-num:1024, packet-filter:tcp and (port 3306) and (host 192.168.0.1) 
 WARN[2019-07-15 12:42:01.423059] [192.168.0.1:3306 => 192.168.0.2:35029] Server: HandShake: Version: [5.7.17-log], ConnectionID: [2053427], Scramble: [[74 27 83 56 27 83 1 106 17 91 26 98 62 77 106 32 3 24 83 1 0]], Charset: [[latin1 latin1_swedish_ci]], AuthPlugin: [mysql_native_password]   
@@ -67,5 +76,5 @@ ERRO[2019-07-15 12:42:20.137733] [192.168.0.2:35029 => 192.168.0.1:3306] Connect
 WARN[2019-07-15 12:42:20.13767] [192.168.0.2:35029 => 192.168.0.1:3306] Client: Quit: MySQL Client Quit   
 ERRO[2019-07-15 12:42:20.1706] [192.168.0.1:3306 => 192.168.0.2:35029] Read Stream Error, [EOF], Read bytes [0]   
 ERRO[2019-07-15 12:42:20.170619] [192.168.0.1:3306 => 192.168.0.2:35029] Connection Closed   
-
+`
 
