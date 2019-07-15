@@ -1,27 +1,22 @@
-# mycap
-====
+# MyCap
 获取MySQL网络包并解析内容，支持指定IP黑白名单、最大抓包数量，后台运行时输出JSON格式日志便于分析
 
 
 ## MySQL version recommend
-====
 建议MySQL-5.7.5以上，较低版本的包可能导致解析异常，未严格测试低版本协议
 
 
 ## Packets type supported
-====
 暂不支持压缩协议、Prepare语句、复制协议，后续版本会支持
 
 
 ## Make & Install
-====
-git clone https://github.com/hustegg/mycap  
-cd mycap  
-go build  
+>git clone https://github.com/hustegg/mycap  
+>cd mycap  
+>go build  
 
 
 ## Usage
-====
 `
 Usage of ./mycap:  
   -b value  
