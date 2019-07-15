@@ -9,7 +9,9 @@
 
 # Make & Install
 git clone https://github.com/hustegg/mycap
+
 cd mycap
+
 go build
 
 # Usage
