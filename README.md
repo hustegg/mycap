@@ -15,29 +15,29 @@ cd mycap
 go build
 
 # Usage
-Usage of ./mycap:
-  -b value
-        Packets white ip list separated by comma
-  -c int
-        Packets number captured before exit (default 1024)
-  -d string
-        Capture MySQL Packet direction [client|server|both] (default "client")
-  -f string
-        Captured packets filename
-  -i string
-        Network interface name (default "eth0")
-  -j    Logging with JSON formatter
-  -m    Capture with promisc mode
-  -p int
-        MySQL server port capture (default 3306)
-  -s int
-        Snap length for pcap packet capture (default 1600)
-  -v    Logging in detail
-  -vv
-        Logging in verbose
-  -w value
-        Packets white ip list separated by comma
-
+Usage of ./mycap:  
+  -b value  
+        Packets white ip list separated by comma  
+  -c int  
+        Packets number captured before exit (default 1024)  
+  -d string  
+        Capture MySQL Packet direction [client|server|both] (default "client")  
+  -f string  
+        Captured packets filename  
+  -i string  
+        Network interface name (default "eth0")  
+  -j    Logging with JSON formatter  
+  -m    Capture with promisc mode  
+  -p int  
+        MySQL server port capture (default 3306)  
+  -s int  
+        Snap length for pcap packet capture (default 1600)  
+  -v    Logging in detail  
+  -vv  
+        Logging in verbose  
+  -w value  
+        Packets white ip list separated by comma  
+  
 
 # Example
 sudo ./mycap -i eth1 -w 192.168.0.1 -d both  
