@@ -63,7 +63,7 @@ func init() {
     arg_direction = flag.String("d", "client", "Capture MySQL Packet direction [client|server|both]")
     arg_dev = flag.String("i", "eth0", "Network interface name")
     arg_capfile = flag.String("f", "", "Captured packets filename")
-    arg_snaplen = flag.Int("s", 1600, "Snap length for pcap packet capture")
+    arg_snaplen = flag.Int("s", 65536, "Snap length for pcap packet capture")
     arg_promisc = flag.Bool("m", false, "Capture with promisc mode")
     arg_myport = flag.Int("p", 3306, "MySQL server port capture")
     arg_pcnt = flag.Int64("c", 1024, "Packets number captured before exit")
