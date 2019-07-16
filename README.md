@@ -11,7 +11,7 @@
 
 
 ## Make & Install
->git clone https://github.com/hustegg/mycap  
+>git clone https://github.com/hustegg/mycap.git  
 >cd mycap  
 >go build  
 
