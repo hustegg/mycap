@@ -22,13 +22,13 @@ func (r *RespOK) String() string {
 type RespErr struct {
     RespType        []byte  `datatype:"FixBytes" length:"1"`
     ErrCode         uint64  `datatype:"FixInt" length:"2"`
-    SQLStateMarker  []byte  `datatype:"FixBytes" length:"1"`
-    SQLState        []byte  `datatype:"FixBytes" length:"5"`
+    SQLStateMarker  string  `datatype:"FixString" length:"1"`
+    SQLState        string  `datatype:"FixString" length:"5"`
     ErrMsg          string  `datatype:"StringEOF"`
 }
 
 func (r *RespErr) String() string {
-    return fmt.Sprintf("Server: Error: ErrCode: [%d], ErrMsg: [%s]", r.ErrCode, r.ErrMsg)
+    return fmt.Sprintf("Server: Error: ErrCode: [%d], ErrMsg: [%s], SQLState: [%s]", r.ErrCode, r.ErrMsg, r.SQLState)
 }
 
 
@@ -83,7 +83,7 @@ type RespColDef struct {
     OrgTable        string  `datatype:"LenEncString"`
     Name            string  `datatype:"LenEncString"`
     OrgName         string  `datatype:"LenEncString"`
-    NextLen         []byte  `datatype:"FixBytes" length:1`
+    NextLen         []byte  `datatype:"FixBytes" length:"1"`
     CharSet         uint64  `datatype:"FixInt" length:"2"`
     ColLen          uint64  `datatype:"FixInt" length:"4"`
     ColType         uint64  `datatype:"FixInt" length:"1"`
@@ -96,8 +96,8 @@ type RespColDef struct {
 func (r *RespColDef) String() string {
 
     charset := CharSetMap[r.CharSet]
-    return fmt.Sprintf("Server: Column Definition: Catalog: [%s], Schema: [%s], Table: [%s], Column: [%s], CharSet: [%s]",
-                        r.Catalog, r.Schema, r.Table, r.Name, charset)
+    return fmt.Sprintf("Server: Column Definition: Catalog: [%s], Schema: [%s], Table: [%s], RealTable:[%s], Column: [%s], RealColumn: [%s], CharSet: [%s]",
+                        r.Catalog, r.Schema, r.Table, r.OrgTable, r.Name, r.OrgName, charset)
 }
 
 type RespStatistics struct {

@@ -55,8 +55,6 @@ func (mstrm *MyStream) run() {
         packets:    make(chan *Packet, 4096),
     }
 
-    log.Info("New Connection ", conn)
-
     if conn.client {
         conn.ParseClient(&mstrm.rdr)
     } else {
@@ -102,8 +100,8 @@ func Capture() error {
                 return io.EOF
             }
 
-            log.Debugf("Captured %d packets", pcap_cnt)
-            log.Debug(raw_packet)
+            log.Tracef("Captured %d packets", pcap_cnt)
+            log.Trace(raw_packet)
 
             if raw_packet.NetworkLayer() == nil ||
                 raw_packet.TransportLayer() == nil ||
@@ -129,11 +127,11 @@ func DisplayPayload(Display chan [2]Payload) {
     for !StopCapture {
         payloads, ok := <-Display
         if !ok {
-            log.Info("Display End")
+            log.Warn("Display End")
             return
         }
         // conn, payload
-        log.Warnf("[%s] %s", payloads[0], payloads[1])
+        display.Infof("[%s] %s", payloads[0], payloads[1])
     }
 
 }

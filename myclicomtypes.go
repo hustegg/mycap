@@ -187,6 +187,37 @@ func (c *ComDaemon) String() string {
     return fmt.Sprintf("Client: Daemon [Internal Command]")
 }
 
+type ComBinlogDump struct {
+    ComType     []byte  `datatype:"FixBytes" length:"1"`
+    BinlogPos   uint64  `datatype:"FixUint" length:"4"`
+    Flags       uint64  `datatype:"FixUint" length:"2"`
+    ServerID    uint64  `datatype:"FixUint" length:"4"`
+    BinlogName  string  `datatype:"StringEOF"`
+}
+
+func (c *ComBinlogDump) String() string {
+    return fmt.Sprintf("Client: Binlog Dump: SlaveServerID: [%d], MasterLogFile: [%s], MasterLogPos: [%d]",
+        c.ServerID, c.BinlogName, c.BinlogPos)
+}
+
+type ComBinlogDumpGTID struct {
+    ComType     []byte  `datatype:"FixBytes" length:"1"`
+    Flags       uint64  `datatype:"FixUint" length:"2"`
+    ServerID    uint64  `datatype:"FixUint" length:"4"`
+    BinlogName  string  `datatype:"FixLenEncString" length:"4"`
+    BinlogPos   uint64  `datatype:"FixUint" length:"8"`
+    Info        string  `datatype:"StringEOF"`
+
+}
+
+func (c *ComBinlogDumpGTID) String() string {
+    return fmt.Sprintf("Client: Binlog Dump: SlaveServerID: [%d], MasterLogFile: [%s], MasterLogPos: [%d], Info: [%s]",
+        c.ServerID, c.BinlogName, c.BinlogPos, c.Info)
+}
+
+
+
+
 
 
 type ComHandShake struct {

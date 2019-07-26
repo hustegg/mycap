@@ -11,10 +11,12 @@ import (
 )
 
 const (
+    Version = "mycap-1.0"
     MyLike = "2006-01-02 15:04:05.999999"
 )
 
 var log = logrus.New()
+var display = logrus.New()
 
 type keywords []string
 
@@ -47,6 +49,7 @@ var arg_pcnt *int64
 var arg_detail *bool
 var arg_verbose *bool
 var arg_jsonfmt *bool
+var arg_version *bool
 
 var bpf_port string
 var bpf_whiteips string
@@ -63,15 +66,20 @@ func init() {
     arg_direction = flag.String("d", "client", "Capture MySQL Packet direction [client|server|both]")
     arg_dev = flag.String("i", "eth0", "Network interface name")
     arg_capfile = flag.String("f", "", "Captured packets filename")
-    arg_snaplen = flag.Int("s", 65536, "Snap length for pcap packet capture")
+    arg_snaplen = flag.Int("s", 65535, "Snap length for pcap packet capture")
     arg_promisc = flag.Bool("m", false, "Capture with promisc mode")
     arg_myport = flag.Int("p", 3306, "MySQL server port capture")
     arg_pcnt = flag.Int64("c", 1024, "Packets number captured before exit")
     arg_detail = flag.Bool("v", false, "Logging in detail")
     arg_verbose = flag.Bool("vv", false, "Logging in verbose")
     arg_jsonfmt = flag.Bool("j", false, "Logging with JSON formatter")
+    arg_version = flag.Bool("V", false, "Show version and exit")
 
     flag.Parse()
+    if *arg_version {
+        fmt.Println(Version)
+        os.Exit(0)
+    }
 
     if *arg_direction == "client" {
         bpf_port = fmt.Sprintf("(dst port %d)", *arg_myport)
@@ -91,16 +99,21 @@ func init() {
     BPF = fmt.Sprintf("tcp and %s %s %s", bpf_port, bpf_whiteips, bpf_blackips)
 
     if *arg_verbose {
-        log.SetLevel(logrus.DebugLevel)
+        log.SetLevel(logrus.TraceLevel)
         //log.SetReportCaller(true)
     } else if *arg_detail {
-        log.SetLevel(logrus.InfoLevel)
+        log.SetLevel(logrus.DebugLevel)
     } else {
-        log.SetLevel(logrus.WarnLevel)
+        log.SetLevel(logrus.InfoLevel)
     }
+
+    display.SetLevel(logrus.InfoLevel)
 
     if *arg_jsonfmt {
         log.SetFormatter(&logrus.JSONFormatter{
+            TimestampFormat: MyLike,
+        })
+        display.SetFormatter(&logrus.JSONFormatter{
             TimestampFormat: MyLike,
         })
     } else {
@@ -108,7 +121,13 @@ func init() {
             TimestampFormat: MyLike,
             FullTimestamp: true,
         })
+        display.SetFormatter(&logrus.TextFormatter{
+            TimestampFormat: MyLike,
+            FullTimestamp: true,
+        })
     }
+
+    display.SetOutput(os.Stdout)
 
 }
 

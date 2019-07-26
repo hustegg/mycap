@@ -45,6 +45,10 @@ func (mc MyConn) String() string {
 }
 
 
+func isPrintable(b byte) bool {
+    return 0x20 < b && b < 0x7f
+}
+
 func parseFixUint(data []byte) (num uint64) {
     for i, b := range data {
         num |= uint64(b) << (8 * uint(i))
@@ -68,14 +72,14 @@ func parseLenEncUint(data []byte) (num uint64, byte_cnt int) {
         return
 
     case 0xfc:
-        byte_cnt = 2
-    case 0xfd:
         byte_cnt = 3
+    case 0xfd:
+        byte_cnt = 4
     case 0xfe:
-        byte_cnt = 8
+        byte_cnt = 9
     }
 
-    num = parseFixUint(data[1:byte_cnt+1])
+    num = parseFixUint(data[1:byte_cnt])
     return
 
 }
@@ -85,9 +89,12 @@ func parseFixString(data []byte) string {
 }
 
 func parseStringNUL(data []byte) (string, int) {
+    var s []byte
     for i, b := range data {
         if b == 0x00 {
-            return string(data[:i]), i+1
+            return string(s), i+1
+        } else if isPrintable(b) {
+            s = append(s, b)
         }
     }
 
@@ -99,7 +106,7 @@ func parseStringEOF(data []byte) (string, int) {
     var last_ok bool
     for _, b := range data {
         // only printable bytes returned
-        if 0x20 < b && b < 0x7f {
+        if isPrintable(b) {
             s = append(s, b)
             last_ok = true
             continue
@@ -110,6 +117,23 @@ func parseStringEOF(data []byte) (string, int) {
         last_ok = false
     }
     return string(s), len(data)
+}
+
+func parseFixLenEncString(data []byte, dlen int) (string, int) {
+    var offset, next int
+    slen := parseFixUint(data[:dlen])
+    offset = dlen
+    next = offset + int(slen)
+
+    total_len := len(data)
+
+    if next > total_len {
+        return "", 0
+    }
+    s := parseFixString(data[offset:next])
+    offset = next
+
+    return s, offset
 }
 
 func parseLenEncStringEOF(data []byte) (string, int) {
@@ -124,7 +148,6 @@ func parseLenEncStringEOF(data []byte) (string, int) {
         offset = next
 
         if v != 0 && dlen == 0 || next > total_len {
-            log.Errorf("Parse parseLenEncStringEOF Error: [%s]", data[offset:])
             return "", 0
         } else if v == 256 && dlen == 1 {
             s = append(s, "NULL")
@@ -288,7 +311,7 @@ func (conn *MyConn) ParseCliPayload(packet *Packet) (payload Payload, err error)
         com_type := packet.payload[0]
         com_fac, ok := CliComTypes[com_type]
         if !ok {
-            log.Infof("[%s] Unknown command type [%v]", conn, com_type)
+            log.Warnf("[%s] Unknown command type [%v]", conn, com_type)
             return nil, ErrUnknownType
         }
         com = com_fac()
@@ -298,7 +321,7 @@ func (conn *MyConn) ParseCliPayload(packet *Packet) (payload Payload, err error)
         conn.capacity = cap_flags
         com = &ComHandShake{}
     } else {
-            log.Infof("[%s] Unknown command type [%v], Packet sequence [%d]", conn, packet.sequence)
+            log.Warnf("[%s] Unknown command type [%v], Packet sequence [%d]", conn, packet.sequence)
             return nil, ErrUnknownType
     }
 
@@ -313,74 +336,83 @@ func (conn *MyConn) ParseCliPayload(packet *Packet) (payload Payload, err error)
         f := irv.Field(i)
         dt := ft.Tag.Get("datatype")
         switch dt {
-            case "FixBytes":
-                dlen, _ := strconv.Atoi(ft.Tag.Get("length"))
-                next = offset + dlen
-                fv := packet.payload[offset:next]
-                f.SetBytes(fv)
-                offset = next
+        case "FixBytes":
+            tlen, _ := strconv.Atoi(ft.Tag.Get("length"))
+            next = offset + tlen
+            fv := packet.payload[offset:next]
+            f.SetBytes(fv)
+            offset = next
 
-            case "LenEncBytes":
-                v, dlen := parseLenEncUint(packet.payload[offset:])
-                next = offset + dlen
-                if v != 0 && dlen == 0 {
-                    log.Errorf("[%s] Parse LenEncBytes Error: [%s]", conn, packet.payload[offset:])
-                    return nil, ErrParseData
-                }
-                offset = next
-
-                // slen here is not a struct value but following string length
-                next = offset + int(v)
-                fv := packet.payload[offset:next]
-                f.SetBytes(fv)
-                offset = next
-
-            case "FixInt":
-                dlen, _ := strconv.Atoi(ft.Tag.Get("length"))
-                next = offset + dlen
-                fv := parseFixUint(packet.payload[offset:next])
-                f.SetUint(fv)
-                offset = next
-
-            case "LenEncUint":
-                fv, dlen := parseLenEncUint(packet.payload[offset:])
-                next = offset + dlen
-                if fv != 0 && dlen == 0 {
-                    log.Errorf("[%s] Parse LenEncInt Error: [%s]", conn, packet.payload[offset:])
-                    return nil, ErrParseData
-                }
-                f.SetUint(fv)
-                offset = next
-
-            case "StringNUL":
-                fv, dlen := parseStringNUL(packet.payload[offset:])
-                next = offset + dlen
-                if dlen < 0 {
-                    log.Errorf("[%s] Parse StringNUL Error: [%s]", conn, packet.payload[offset:])
-                    return nil, ErrParseData
-                }
-                f.SetString(fv)
-                offset = next
-
-            case "StringEOF":
-                fv, dlen := parseStringEOF(packet.payload[offset:])
-                next = offset + dlen
-                f.SetString(fv)
-                offset = next
-
-            case "StringNULEOF":
-                fv, dlen := parseStringNULEOF(packet.payload[offset:])
-                next = offset + dlen
-                if dlen == 0 {
-                    log.Errorf("[%s] Parse StringNULEOF Error: [%s]", conn, packet.payload[offset:])
-                    return nil, ErrParseData
-                }
-                f.SetString(fv)
-                offset = next
-
-            default:
-                log.Errorf("[%s] Unkown Data Type: [%s]", conn, dt)
+        case "LenEncBytes":
+            v, dlen := parseLenEncUint(packet.payload[offset:])
+            next = offset + dlen
+            if v != 0 && dlen == 0 {
+                log.Errorf("[%s] Parse LenEncBytes Error: [%s]", conn, packet.payload[offset:])
                 return nil, ErrParseData
+            }
+            offset = next
+
+            // slen here is not a struct value but following string length
+            next = offset + int(v)
+            fv := packet.payload[offset:next]
+            f.SetBytes(fv)
+            offset = next
+
+        case "FixInt":
+            tlen, _ := strconv.Atoi(ft.Tag.Get("length"))
+            next = offset + tlen
+            fv := parseFixUint(packet.payload[offset:next])
+            f.SetUint(fv)
+            offset = next
+
+        case "LenEncUint":
+            fv, dlen := parseLenEncUint(packet.payload[offset:])
+            next = offset + dlen
+            if fv != 0 && dlen == 0 {
+                log.Errorf("[%s] Parse LenEncInt Error: [%s]", conn, packet.payload[offset:])
+                return nil, ErrParseData
+            }
+            f.SetUint(fv)
+            offset = next
+
+        case "StringNUL":
+            fv, dlen := parseStringNUL(packet.payload[offset:])
+            next = offset + dlen
+            if dlen < 0 {
+                log.Errorf("[%s] Parse StringNUL Error: [%s]", conn, packet.payload[offset:])
+                return nil, ErrParseData
+            }
+            f.SetString(fv)
+            offset = next
+
+        case "StringEOF":
+            fv, dlen := parseStringEOF(packet.payload[offset:])
+            next = offset + dlen
+            f.SetString(fv)
+            offset = next
+
+        case "StringNULEOF":
+            fv, dlen := parseStringNULEOF(packet.payload[offset:])
+            next = offset + dlen
+            if dlen == 0 {
+                log.Errorf("[%s] Parse StringNULEOF Error: [%s]", conn, packet.payload[offset:])
+                return nil, ErrParseData
+            }
+            f.SetString(fv)
+            offset = next
+
+        case "FixLenEncString":
+            tlen, _ := strconv.Atoi(ft.Tag.Get("length"))
+            fv, dlen := parseFixLenEncString(packet.payload[offset:], tlen)
+            if dlen == 0 {
+                log.Errorf("Parse parseFixLenEncString Error: [%s]", conn, packet.payload[offset:])
+            }
+            f.SetString(fv)
+            offset = next
+
+        default:
+            log.Errorf("[%s] Unkown Data Type: [%s]", conn, dt)
+            return nil, ErrParseData
         }
 
     }
@@ -578,10 +610,10 @@ func (conn *MyConn) ParseClient(r io.Reader) {
     for !StopCapture {
         packet, ok := <-conn.packets
         if !ok {
-            log.Errorf("[%s] Connection Closed", conn)
+            log.Debugf("[%s] Connection Closed", conn)
             return
         }
-        log.Infof("[%s] Client packet: [%v]", conn, packet)
+        log.Debugf("[%s] Client packet: [%v]", conn, packet)
 
         payload, err := conn.ParseCliPayload(packet)
         if err != nil {
@@ -600,10 +632,10 @@ func (conn *MyConn) ParseServer(r io.Reader) {
     for !StopCapture {
         packet, ok := <-conn.packets
         if !ok {
-            log.Errorf("[%s] Connection Closed", conn)
+            log.Debugf("[%s] Connection Closed", conn)
             return
         }
-        log.Infof("[%s] Server packet: [%v]", conn, packet)
+        log.Debugf("[%s] Server packet: [%v]", conn, packet)
 
         payload, err := conn.ParseSrvPayload(packet)
         if err != nil {
