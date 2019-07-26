@@ -72,7 +72,7 @@ func Capture() error {
         fmt.Fprintf(os.Stderr, "Read MySQL packets from pcap file\n")
         handle, err = pcap.OpenOffline(*arg_capfile)
     } else {
-        fmt.Fprintf(os.Stderr, "Start capture MySQL packets, device:%s, max-cap-num:%d, packet-filter:%s\n", *arg_dev, *arg_pcnt, BPF)
+        fmt.Fprintf(os.Stderr, "Start capture MySQL packets, device:%s, snaplen:%d, max-cap-num:%d, packet-filter:%s\n", *arg_dev, *arg_snaplen, *arg_pcnt, BPF)
         handle, err = pcap.OpenLive(*arg_dev, int32(*arg_snaplen), *arg_promisc, pcap.BlockForever)
     }
     if err != nil {

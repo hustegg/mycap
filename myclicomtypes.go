@@ -200,6 +200,47 @@ func (c *ComBinlogDump) String() string {
         c.ServerID, c.BinlogName, c.BinlogPos)
 }
 
+type ComStmtPrepare struct {
+    ComType     []byte  `datatype:"FixBytes" length:"1"`
+    Query       string  `datatype:"StringEOF"`
+}
+
+func (c *ComStmtPrepare) String() string {
+    return fmt.Sprintf("Client: Statement Prepare: [%s]", c.Query)
+}
+
+type ComStmtExecute struct {
+    ComType     []byte  `datatype:"FixBytes" length:"1"`
+    StmtID      uint64  `datatype:"FixUint" length:"4"`
+    Flags       uint64  `datatype:"FixUint" length:"1"`
+    IterCnt     uint64  `datatype:"FixUint" length:"4"`
+    Info        string  `datatype:"StringEOF"`
+}
+
+func (c *ComStmtExecute) String() string {
+    return fmt.Sprintf("Client: Statement Execute: StatementID: [%d], Info: [%s]", c.StmtID, c.Info)
+}
+
+type ComStmtClose struct {
+    ComType     []byte  `datatype:"FixBytes" length:"1"`
+    StmtID      uint64  `datatype:"FixUint" length:"4"`
+}
+
+func (c *ComStmtClose) String() string {
+    return fmt.Sprintf("Client: Statement Close: [%d]", c.StmtID)
+}
+
+type ComStmtReset struct {
+    ComType     []byte  `datatype:"FixBytes" length:"1"`
+    StmtID      uint64  `datatype:"FixUint" length:"4"`
+}
+
+func (c *ComStmtReset) String() string {
+    return fmt.Sprintf("Client: Statement Reset: [%d]", c.StmtID)
+}
+
+
+
 type ComBinlogDumpGTID struct {
     ComType     []byte  `datatype:"FixBytes" length:"1"`
     Flags       uint64  `datatype:"FixUint" length:"2"`
